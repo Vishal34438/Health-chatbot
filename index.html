@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MITAOE Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #007BFF;
+      --secondary: #f5f5f5;
+      --accent: orange;
+      --dark-bg: #1e1e1e;
+      --dark-secondary: #2a2a2a;
+      --text-dark: #222;
+      --text-light: #fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: linear-gradient(135deg, #FFA500, #FFFF66);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #111, #333);
+      color: var(--text-light);
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header h1 {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #444;
+    }
+
+    body.dark header p {
+      color: #ccc;
+    }
+
+    #image-gallery {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px auto 30px;
+      max-width: 1200px;
+    }
+
+    #image-gallery img {
+      width: 200px;
+      height: 200px;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      transition: transform 0.3s ease;
+      animation: floatImg 6s ease-in-out infinite;
+    }
+
+    #image-gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    @keyframes floatImg {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #chat-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      width: 90%;
+      max-width: 750px;
+      height: 750px;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s;
+      margin-bottom: 40px;
+    }
+
+    body.dark #chat-container {
+      background-color: var(--dark-bg);
+    }
+
+    #chat-header {
+      background-color: var(--secondary);
+      padding: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.dark #chat-header {
+      background-color: var(--dark-secondary);
+      color: white;
+    }
+
+    #theme-toggle {
+      font-size: 26px;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #fdfdfd;
+      transition: background 0.3s;
+    }
+
+    body.dark #chat-box {
+      background: #1e1e1e;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-start;
+      margin: 12px 0;
+      padding: 12px;
+      border-radius: 12px;
+      max-width: 75%;
+      font-size: 17px;
+      line-height: 1.6;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .user-message {
+      margin-left: auto;
+      background-color: #d1f7d1;
+      flex-direction: row-reverse;
+    }
+
+    .bot-message {
+      margin-right: auto;
+      background-color: #eee;
+    }
+
+    body.dark .user-message {
+      background-color: #387c44;
+      color: white;
+    }
+
+    body.dark .bot-message {
+      background-color: #444;
+      color: white;
+    }
+
+    .icon {
+      font-size: 24px;
+      margin: 0 10px;
+    }
+
+    .message-text {
+      max-width: 90%;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      padding: 16px;
+      border-top: 1px solid #ccc;
+      background: #f8f8f8;
+    }
+
+    body.dark #controls {
+      background: #2a2a2a;
+      border-color: #555;
+    }
+
+    #user-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 17px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #user-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    #submit-btn, #mic-btn {
+      font-size: 16px;
+      font-weight: bold;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #submit-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    #submit-btn:hover {
+      background: #0056b3;
+    }
+
+    #mic-btn {
+      background: var(--accent);
+      color: white;
+      font-size: 20px;
+    }
+
+    .loading-dots::after {
+      content: '';
+      display: inline-block;
+      width: 1em;
+      animation: dots 1.2s steps(3, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ''; }
+      33% { content: '.'; }
+      66% { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    @media (max-width: 600px) {
+      #chat-container {
+        height: 90vh;
+      }
+
+      #image-gallery img {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>MIT Academy of Engineering</h1>
+    <p>Your virtual assistant for admissions, courses & more!</p>
+  </header>
+
+  <section id="image-gallery">
+    <img src="mit1.jpg" alt="Campus View 1">
+    <img src="mit2.jpg" alt="Campus View 2">
+    <img src="mit5.jpg" alt="Campus View 5">
+    <img src="mit3.jpg" alt="Campus View 3">
+    <img src="mit4.jpg" alt="Campus View 4">
+  </section>
+
+  <main id="chat-container">
+    <div id="chat-header">
+      MITAOE Chatbot 🤖
+      <button id="theme-toggle" title="Toggle Theme">🌙</button>
+    </div>
+    <div id="chat-box"></div>
+    <div id="controls">
+      <input type="text" id="user-input" placeholder="Ask me about MIT Academy of Engineering..." />
+      <button id="mic-btn">🎤</button>
+      <button id="submit-btn">Send</button>
+    </div>
+  </main>
+
+  <script>
+    const userInput = document.getElementById('user-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const micBtn = document.getElementById('mic-btn');
+    const chatBox = document.getElementById('chat-box');
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    function addMessage(message, sender, isLoading = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+
+      const icon = document.createElement('span');
+      icon.classList.add('icon');
+      icon.innerHTML = sender === 'user' ? '👨🏻‍🎓' : '🤖';
+
+      const messageText = document.createElement('span');
+      messageText.classList.add('message-text');
+
+      if (isLoading) {
+        messageText.classList.add('loading-dots');
+        messageText.textContent = '';
+      } else {
+        messageText.textContent = message;
+      }
+
+      messageDiv.appendChild(icon);
+      messageDiv.appendChild(messageText);
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      return messageText;
+    }
+
+    function botResponse(userText) {
+      userText = userText.toLowerCase();
+      
+      const responses = [
+        { keywords: ["hello", "hi"], response: "Hello! How can I assist you with MIT - Academy of Engineering? 🎓😊" },
+        { keywords: ["admission"], response: "Admissions are open! Visit our official website or admission cell 📋✨" },
+        { keywords: ["courses", "branches"], response: "We offer Engineering (CSE, AI&DS, ECE, MECH), MBA, and more 📘🔧" },
+        { keywords: ["fees", "fee structure"], response: "Fee details are available online or at the admin office 💰📑" },
+        { keywords: ["deadline", "last date"], response: "Admission deadlines are usually in June 🗓️🚀 Apply early!" },
+        { keywords: ["location", "where"], response: "MITAOE is located in Alandi (D), Pune, Maharashtra 📍🗺️" },
+        { keywords: ["contact", "phone", "email"], response: "Call us at +91-8459660765 or mail 202401110055@mitaoe.ac.in 📞📧" },
+        { keywords: ["placements"], response: "Top companies like TCS, Infosys, Capgemini hire from us 📊🏢" },
+        { keywords: ["hostel", "accommodation"], response: "Yes, we have separate hostels for boys and girls 🏠🛏️" },
+        { keywords: ["canteen", "food"], response: "Our canteen offers hygienic and tasty food 🍽️😋" },
+        { keywords: ["wifi", "internet"], response: "Wi-Fi is available across the campus for students and staff 🌐📶" },
+        { keywords: ["library"], response: "We have a digital and physical library with thousands of resources 📚💡" },
+        { keywords: ["labs", "laboratories"], response: "Our labs are equipped with modern technology for all branches 🧪🖥️" },
+        { keywords: ["faculty", "teachers"], response: "Our faculty members are highly qualified and student-friendly 👨‍🏫👩‍🏫" },
+        { keywords: ["sports", "playground"], response: "Yes! We have indoor and outdoor sports facilities 🏀⚽🏓" },
+        { keywords: ["events", "fest"], response: "Annual tech fest 'Pioneer' and cultural fest 'Khalbali' are a hit 🎉🎶" },
+        { keywords: ["clubs", "activities"], response: "Coding Club, Robotics Club, Drama Club, and more await you 🎭🤖💃" },
+        { keywords: ["internship"], response: "We offer industry internships through the T&P cell 💼📈" },
+        { keywords: ["exam", "evaluation"], response: "We follow a semester system with regular assessments 📖📝" },
+        { keywords: ["scholarship", "financial aid"], response: "Merit and government scholarships are available 💸🎓" },
+        { keywords: ["bus", "transport"], response: "College buses run from various points in Pune 🚍🛣️" },
+        { keywords: ["attendance"], response: "Students must maintain at least 75% attendance 📋⏰" },
+        { keywords: ["alumni"], response: "Our alumni work in top firms and pursue higher studies globally 🌍🎓" },
+        { keywords: ["principal", "hod", "director"], response: "You can find all faculty details on our official site 🧑‍💼📘" },
+        { keywords: ["foreign exchange", "international"], response: "Yes, we have MoUs with international universities 🌐📜" },
+        { keywords: ["results"], response: "Results are announced online after semester exams 📊📢" },
+        { keywords: ["research", "projects"], response: "We support student innovation and research projects 📈💡" },
+        { keywords: ["startup", "incubation"], response: "Our incubation center helps student startups take off 🚀💼" },
+        { keywords: ["ragging"], response: "We have a strict anti-ragging policy 🚫📢" },
+        { keywords: ["grievance", "complaint"], response: "Student grievance redressal cell is active and responsive 🧾⚖️" },
+        { keywords: ["goodbye", "bye"], response: "Goodbye! Have a great day. Come back if you have more questions 👋😊" }
+      ];
+
+      for (const item of responses) {
+        if (item.keywords.some(kw => userText.includes(kw))) {
+          return item.response;
+        }
+      }
+      return "Sorry, I didn't catch that 🤔. Try asking about admissions, courses, or contacts!";
+    }
+
+    function handleUserMessage() {
+      const userMessage = userInput.value.trim();
+      if (userMessage) {
+        addMessage(userMessage, 'user');
+        userInput.value = '';
+        const loadingMsg = addMessage('', 'bot', true);
+
+        setTimeout(() => {
+          loadingMsg.classList.remove('loading-dots');
+          loadingMsg.textContent = botResponse(userMessage);
+        }, 1000);
+      }
+    }
+
+    submitBtn.addEventListener('click', handleUserMessage);
+    userInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') handleUserMessage();
+    });
+
+    micBtn.addEventListener('click', () => {
+      alert("Voice input is currently not enabled.");
+    });
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark');
+      themeToggle.textContent = body.classList.contains('dark') ? '🌞' : '🌙';
+    });
+  </script>
+</body>
+</html>
